@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ホストのファイルをコンテナの作業フォルダにコピー
 COPY . .
 
-# コンテナが起動したときにstremlitを実行
-CMD ["streamlit", "run", "main.py"]
+# ポート番号を指定
+EXPOSE 80
+
+# コンテナが起動したときにstremlitをポート番号80で実行
+CMD ["streamlit", "run", "app.py", "--server.port", "80"]
