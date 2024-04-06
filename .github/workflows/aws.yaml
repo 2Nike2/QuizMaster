@@ -10,6 +10,8 @@ env:
   ECR_REPOSITORY: quizmaster          # set this to your Amazon ECR repository name
   ECS_SERVICE: quizmaster_service               # set this to your Amazon ECS service name
   ECS_CLUSTER: quizmaster_cluster                # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION_TEMPLATE: task-definition.json.template # set this to the path to your Amazon ECS task definition
+                                               # template file, e.g. .aws/task-definition.json.template
   ECS_TASK_DEFINITION: task-definition.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: quizmaster_container           # set this to the name of the container in the
@@ -51,6 +53,10 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+    - name: Replace AWS_ACCOUNT_ID and create task definition
+      run: |
+        sed "s/AWS_ACCOUNT_ID/${{ secrets.AWS_ACCOUNT_ID }}/" ${{ env.ECS_TASK_DEFINITION_TEMPLATE }} > ${{ env.ECS_TASK_DEFINITION }}
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
