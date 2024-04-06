@@ -16,6 +16,5 @@ COPY . .
 # ポート番号を指定
 EXPOSE 80
 
-# コンテナが起動したときにstremlitをポート番号80で実行
-# CMD ["streamlit", "run", "app.py", "--server.port", "80"]
-CMD ["streamlit", "run", "test.py", "--server.port", "80"]
+# bashスクリプトで前処理とstreamlitの起動を行う。
+CMD ["bash", "start.sh"]
