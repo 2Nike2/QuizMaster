@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+config_yaml_template_path = 'config.yaml.template'
 config_yaml_path = 'config.yaml'
 
 site_user_list = os.getenv("SITE_USER_LIST").split(',')
@@ -16,7 +17,7 @@ site_password_list = os.getenv("SITE_PASSWORD_LIST").split(',')
 site_email_list = os.getenv("SITE_EMAIL_LIST").split(',')
 
 ## yaml 設定一覧が記述されたデータを読み込み
-with open(config_yaml_path,"r") as f:
+with open(config_yaml_template_path,"r") as f:
     yaml_data = yaml.safe_load(f)
 
 ## パスワードのハッシュ化
