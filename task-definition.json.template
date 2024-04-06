@@ -53,6 +53,7 @@
       "FARGATE"
     ],
     "executionRoleArn": "ecsTaskExecutionRole",
+    "taskRoleArn": "ecsTaskExecutionRole",
     "cpu": "256",
     "memory": "512"
 }
