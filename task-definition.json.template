@@ -15,31 +15,31 @@
         "essential": true,
         "secrets": [
           {
-            "name": "PS_AWS_ACCESS_KEY_ID",
+            "name": "AWS_ACCESS_KEY_ID",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_AWS_ACCESS_KEY_ID"
           },
           {
-            "name": "PS_AWS_DEFAULT_REGION",
+            "name": "AWS_DEFAULT_REGION",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_AWS_DEFAULT_REGION"
           },
           {
-            "name": "PS_AWS_REGION",
+            "name": "AWS_REGION",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_AWS_REGION"
           },
           {
-            "name": "PS_AWS_SECRET_ACCESS_KEY",
+            "name": "AWS_SECRET_ACCESS_KEY",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_AWS_SECRET_ACCESS_KEY"
           },
           {
-            "name": "PS_SITE_EMAIL_LIST",
+            "name": "SITE_EMAIL_LIST",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_SITE_EMAIL_LIST"
           },
           {
-            "name": "PS_SITE_PASSWORD_LIST",
+            "name": "SITE_PASSWORD_LIST",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_SITE_PASSWORD_LIST"
           },
           {
-            "name": "PS_SITE_USER_LIST",
+            "name": "SITE_USER_LIST",
             "valueFrom": "arn:aws:ssm:ap-northeast-1:AWS_ACCOUNT_ID:parameter/PS_SITE_USER_LIST"
           }
         ]
