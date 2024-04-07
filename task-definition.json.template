@@ -1,6 +1,6 @@
 {
     "family": "httpd-task",
-    "networkMode": "awsvpc",
+    "networkMode": "bridge",
     "containerDefinitions": [
       {
         "name": "quizmaster_container",
@@ -8,7 +8,7 @@
         "portMappings": [
           {
             "containerPort": 80,
-            "hostPort": 80,
+            "hostPort": 443,
             "protocol": "tcp"
           }
         ],
