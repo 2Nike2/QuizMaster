@@ -50,7 +50,7 @@
       "operatingSystemFamily": "LINUX"
     },
     "requiresCompatibilities": [
-      "FARGATE"
+      "EC2"
     ],
     "executionRoleArn": "ecsTaskExecutionRole",
     "taskRoleArn": "ecsTaskExecutionRole",
