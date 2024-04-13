@@ -4,7 +4,9 @@ import yaml
 from yaml.loader import SafeLoader
 from dotenv import load_dotenv
 import os
-import boto3
+from langchain_openai import AzureChatOpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
 import json
 
 # .envの読み込み(AWSの認証情報を想定)
@@ -25,44 +27,54 @@ authenticator = stauth.Authenticate(
 authenticator.login()
 if st.session_state["authentication_status"]:   
 
-    # AWSのBedrockに接続する為のクライアントを生成
-    client = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
-
     # 使用する生成AIのモデル
-    # model_id = 'anthropic.claude-3-haiku-20240307-v1:0'
-    model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
+    deployment_name = 'gpt-35-turbo'
 
-    question_generation_prompt_template = '''\
-    ### 指示
-    あなたは有名なクイズ作家兼プログラマーです。与えられたジャンルに関する4択クイズを考えて、指定した形式で出力してください。
+    # AzureのOpenAIのモデル
+    model = AzureChatOpenAI(deployment_name=deployment_name)
 
-    ### 条件
-    ・大前提として記述については正確であることが求められます、間違った知識、あいまいな知識による問題、回答、解説の生成はしないでください。
-    ・難易度としては中学生向けから学者向けまで幅広いレベルの問題を出していいです。
-    ・正解は1つのみにしてください。
-    ・ユーザは何度もクイズを解くことになるので、空きが来ないようにジャンルに基づいたうえで様々な問題を生成してください。
-    ・出力内容としては「ジャンル」、「問題」、「1」、「2」、「3」、「4」、「回答番号」、「解説」にしてください。全て文字列です。
-    ・「回答番号」は「1」、「2」、「3」、「4」のいずれかです。文字列で出力してください。
-    ・クイズはWebサイトで出題、回答させることを想定している為、プログラムで扱いやすいJSON形式で返してください。
-    ・「回答番号」については偏りがあると回答者が真剣に考えることなく選択する可能性があるため、適度にランダムに選択してください。
+    prompt = PromptTemplate.from_template('''\
+### 指示
+あなたは有名なクイズ作家兼プログラマーです。与えられたジャンルに関する4択クイズを考えて、指定した形式で出力してください。
 
-    ### 出力(JSON)例
-    {{
-        "ジャンル": "ことわざ",
-        "問題": "「猿も木から落ちる」の意味は何ですか？",
-        "1": "猿は木から降りるのが下手",
-        "2": "熟練した人でも失敗することがある",
-        "3": "木が高ければ高いほど落ちやすい",
-        "4": "猿は木を壊す",
-        "回答番号": "2",
-        "解説": "このことわざは、普段猿が木登りが上手であるにも関わらず、時には木から落ちることがあるという事実から来ています。\\nそれに喩えて、どんなに技術が高く、経験が豊富な人であっても、時には間違いや失敗を犯すことがあるという意味を込めています。"
-    }}
-        
-    ### ジャンル
-    {}
+### 条件
+・大前提として記述については正確であることが求められます、絶対に間違った知識、あいまいな知識による問題、回答、解説の生成はしないでください。
+　ユーザの知識に歪めるようなクイズを作ったら減給になります。
+・難易度としては一般人向けの難易度にしてください。
+・正解は1つのみにしてください。
+・ユーザは何度もクイズを解くことになるので、空きが来ないようにジャンルに基づいたうえで様々な問題を生成してください。
+・出力内容としては「ジャンル」、「問題」、「1」、「2」、「3」、「4」、「回答番号」、「解説」にしてください。全て文字列です。
+・「回答番号」は「1」、「2」、「3」、「4」のいずれかです。文字列で出力してください。
+・クイズはWebサイトで出題、回答させることを想定している為、プログラムで扱いやすいJSON形式で返してください。
+・「回答番号」については偏りがあると回答者が真剣に考えることなく選択する可能性があるため、均等に分散させるようにしてください。
+・「解説」については、問題全体についての簡単な解説をしてください。
+・「1解説」、「2解説」、「3解説」、「4解説」については、それぞれの選択肢に対する正解または不正解の理由を解説してください。
 
-    ### 出力(JSON)
-    '''
+### 出力(JSON)例
+{{
+    "ジャンル": "地理",
+    "問題": "世界で最も長い川は何ですか？",
+    "1": "アマゾン川",
+    "2": "ナイル川",
+    "3": "長江",
+    "4": "ミシシッピ川",
+    "回答番号": "2",
+    "解説": "ナイル川はアフリカを流れる川で、全長約6,650キロメートルに及びます。これは世界で最も長い川とされており、その流域は複数の国にまたがっています。ナイル川は古代エジプト文明の発展に大きく寄与し、今日でもその地域の重要な水源となっています。",
+    "1解説": "1 アマゾン川 - 不正解。アマゾン川は南アメリカに位置し、流量は世界で最も多いですが、長さではナイル川に次ぐ第二位です。",
+    "2解説": "2 ナイル川 - 正解。前述の通り、ナイル川は世界で最も長い川です。",
+    "3解説": "3 長江 - 不正解。ヤンツェ川は中国最長の川であり、アジアでも長さで第三位ですが、世界全体ではナイル川やアマゾン川に比べて短いです。",
+    "4解説": "4 ミシシッピ川 - 不正解。ミシシッピ川はアメリカ合衆国を流れる主要な川の一つであり、世界で最も長い川のリストで上位に位置していますが、最も長い川はナイル川です。"
+}}
+    
+### ジャンル
+{genre}
+
+### 出力(JSON)
+''')
+    
+    parser = JsonOutputParser()
+    
+    chain = prompt | model | parser
 
     # 問題と正答をセッション状態で保持
     if 'question' not in st.session_state:
@@ -82,30 +94,11 @@ if st.session_state["authentication_status"]:
     # 出題ボタン
     if st.button('出題'):
 
-        prompt = question_generation_prompt_template.format(genre)
-        # 問題と正答の自動生成
-        response = client.invoke_model(
-                        modelId=model_id,
-                        body=json.dumps(
-                            {
-                                "anthropic_version": "bedrock-2023-05-31",
-                                "max_tokens": 1024,
-                                "temperature": 0.8,
-                                "messages": [
-                                    {
-                                        "role": "user",
-                                        "content": [{"type": "text", "text": prompt}],
-                                    }
-                                ],
-                            }
-                        ),
-                    )
-        
-        result = json.loads(json.loads(response.get('body').read())['content'][0]['text'])
-        
+        result = chain.invoke({'genre': genre})
+
         st.session_state.question = result['問題']
         st.session_state.correct = result['回答番号']
-        st.session_state.explanation = result['解説']
+        st.session_state.explanation = result['解説'] + '  \n' + result['1解説'] + '  \n' + result['2解説'] + '  \n' + result['3解説'] + '  \n' + result['4解説']
         for i in range(1, 5):
             st.session_state.choice_dict[str(i)] = result[str(i)]
 
@@ -130,6 +123,8 @@ if st.session_state["authentication_status"]:
             st.write(f'正解は{st.session_state.correct}です。')
             st.write('解説')
             st.write(st.session_state.explanation)
+            
+    
     
     authenticator.logout('ログアウト', 'sidebar')
         
